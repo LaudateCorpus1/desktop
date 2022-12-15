@@ -35,7 +35,6 @@ import { IConstrainedValue } from '../../lib/app-state'
 import { clamp } from '../../lib/clamp'
 import { pathExists } from '../lib/path-exists'
 import { enableMultiCommitDiffs } from '../../lib/feature-flag'
-import { PopupType } from '../../models/popup'
 import { UnreachableCommitsTab } from './unreachable-commits-dialog'
 
 interface ISelectedCommitsProps {
@@ -71,6 +70,9 @@ interface ISelectedCommitsProps {
    * system-assigned application for said file type.
    */
   readonly onOpenBinaryFile: (fullPath: string) => void
+
+  /** Called when the user requests to open a submodule. */
+  readonly onOpenSubmodule: (fullPath: string) => void
 
   /**
    * Called when the user is viewing an image diff and requests
@@ -162,6 +164,7 @@ export class SelectedCommits extends React.Component<
         onOpenBinaryFile={this.props.onOpenBinaryFile}
         onChangeImageDiffType={this.props.onChangeImageDiffType}
         onHideWhitespaceInDiffChanged={this.onHideWhitespaceInDiffChanged}
+        onOpenSubmodule={this.props.onOpenSubmodule}
       />
     )
   }
@@ -190,10 +193,7 @@ export class SelectedCommits extends React.Component<
   }
 
   private showUnreachableCommits = (selectedTab: UnreachableCommitsTab) => {
-    this.props.dispatcher.showPopup({
-      type: PopupType.UnreachableCommits,
-      selectedTab,
-    })
+    this.props.dispatcher.showUnreachableCommits(selectedTab)
   }
 
   private onHighlightShas = (shasToHighlight: ReadonlyArray<string>) => {
@@ -320,7 +320,7 @@ export class SelectedCommits extends React.Component<
     return (
       <div id="multiple-commits-selected" className="blankslate">
         <div className="panel blankslate">
-          <img src={BlankSlateImage} className="blankslate-image" />
+          <img src={BlankSlateImage} className="blankslate-image" alt="" />
           <div>
             <p>
               Unable to display diff when multiple{' '}
@@ -445,7 +445,7 @@ function NoCommitSelected() {
 
   return (
     <div className="panel blankslate">
-      <img src={BlankSlateImage} className="blankslate-image" />
+      <img src={BlankSlateImage} className="blankslate-image" alt="" />
       No commit selected
     </div>
   )
